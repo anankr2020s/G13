@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	
+
 	"github.com/pechkr2020/sa-project/entity"
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +44,6 @@ func CreateBill(c *gin.Context) {
 
 	
 		
-	
 	// 12: สร้าง Bill
 	bl := entity.Bill{
 		Examination: examination,             // โยงความสัมพันธ์กับ Entity Examination

@@ -72,6 +72,8 @@ type Cashier struct {
 
 	Name		string
 
+	Email		string		`gorm:"uniqueIndex"`
+
 	Password	string
 
 	Bills		[]Bill		`gorm:"foreignKey:CashierID"`
@@ -92,7 +94,7 @@ type Bill struct {
 
 	gorm.Model
 
-	ExaminationID	*uint
+	ExaminationID	*uint	
 
 	Examination		Examination		`gorm:"references:id"`
 

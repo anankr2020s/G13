@@ -5,6 +5,8 @@ import (
 	"github.com/pechkr2020/sa-project/controller"
 
 	"github.com/pechkr2020/sa-project/entity"
+
+	"github.com/pechkr2020/sa-project/middlewares"
   
 	"github.com/gin-gonic/gin"
   
@@ -19,31 +21,42 @@ import (
 	r := gin.Default()
 
 	r.Use(CORSMiddleware())
-  
 
-	//Patient Routes
+	api := r.Group("")
+	{
+		
+		protected := api.Use(middlewares.Authorizes())
+		{
 
-	r.GET("/patients", controller.ListPatient)
-	r.GET("/patient/:id", controller.GetPatient)
+			//Patient Routes
 
-	//Examinations Routes
-	r.GET("/examinations", controller.ListExaminations)
-	r.GET("/examination/:id", controller.GetExamination)
+			protected.GET("/patients", controller.ListPatient)
+			protected.GET("/patient/:id", controller.GetPatient)
 
-	//PatientRight Routes
-	r.GET("/patientrights", controller.ListPatientRights)
-	r.GET("/patientright/:id", controller.GetPatientRight)
+			//Examinations Routes
+			protected.GET("/examinations", controller.ListExaminations)
+			protected.GET("/examination/:id", controller.GetExamination)
 
-	//Crashier Routes
-	r.GET("/cashiers", controller.ListCashiers)
-	r.GET("/cashier/:id", controller.GetCashier)
+			//PatientRight Routes
+			protected.GET("/patientrights", controller.ListPatientRights)
+			protected.GET("/patientright/:id", controller.GetPatientRight)
 
-	//Bill Routes
-	r.GET("/bills", controller.ListBills)
-	r.GET("/bill/:id", controller.GetBill)
-	r.POST("/bills", controller.CreateBill)
-	r.PATCH("/bills", controller.UpdateBill)
-	r.DELETE("/bills/:id", controller.DeleteBill)
+			//Crashier Routes
+			protected.GET("/cashiers", controller.ListCashiers)
+			protected.GET("/cashier/:id", controller.GetCashier)
+
+			//Bill Routes
+			protected.GET("/bills", controller.ListBills)
+			protected.GET("/bill/:id", controller.GetBill)
+			protected.POST("/bills", controller.CreateBill)
+			protected.PATCH("/bills", controller.UpdateBill)
+			protected.DELETE("/bills/:id", controller.DeleteBill)
+		}
+
+	}
+
+	// Authentication Routes
+	r.POST("/login", controller.Login)
 	
 	r.Run()
   

@@ -7,6 +7,8 @@ import (
 
 	"gorm.io/gorm"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"gorm.io/driver/sqlite"
 )
 
@@ -104,32 +106,46 @@ func SetupDatabase(){
 	}
 	db.Model(&Examination{}).Create(&Ex2)
 	
+	password, err := bcrypt.GenerateFromPassword([]byte("1234"), 14)
+	password1, err := bcrypt.GenerateFromPassword([]byte("1235"), 14)
+	password2, err := bcrypt.GenerateFromPassword([]byte("2020"), 14)
 	
 	//Crashier Data
 	Cra1 := Cashier{
-		Name: "Somsom",
-		Password: "somsom1234",
+		Name: "อนันต์",
+		Email: "anan1234@gmail.com",
+		Password: string(password),
 	}
 	db.Model(&Cashier{}).Create(&Cra1)
 
+	Cra2 := Cashier{
+		Name: "ภูวดล",
+		Email: "phu123@gmail.com",
+		Password: string(password1),
+	}
+	db.Model(&Cashier{}).Create(&Cra2)
+
+	Cra3 := Cashier{
+		Name: "ภูมิชัย",
+		Email: "phumchai123@gmail.com",
+		Password: string(password2),
+	}
+	db.Model(&Cashier{}).Create(&Cra3)
+
 	//PatientRight Data
 	Pr1 := PatientRight{
-		Name: "บัตรทอง",
-		Discount: 300,
+		Name: "สิทธิ์สุขภาพถ้วนหน้า",
+		Discount: 80,
 	}
 	db.Model(&PatientRight{}).Create(&Pr1)
 
 	Pr2 := PatientRight{
-		Name: "บัตรนักศึกษา",
-		Discount: 250,
+		Name: "สิทธิ์นักศึกษา",
+		Discount: 50,
 	}
 	db.Model(&PatientRight{}).Create(&Pr2)
 
-	Pr3 := PatientRight{
-		Name: "บัตรผู้สูงอายุ",
-		Discount: 500,
-	}
-	db.Model(&PatientRight{}).Create(&Pr3)
+	    
 	
 
 

@@ -13,6 +13,6 @@ export interface BillInterface{
     BillTime:   Date,
     Total:  number,
     CashierID: number,
-    Crashier: CashierInterface,
+    Cashier: CashierInterface,
 
 }

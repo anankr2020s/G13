@@ -58,7 +58,7 @@ function BillCreate(){
     const [patients, setPatients] = useState<PatientInterface[]>([]);
     const [examinations, setExaminations] = useState<ExaminationInterface[]>([]);
     const [patientrights, setPatientRights] = useState<PatientRightInterface[]>([]);
-    const [cashiers, setCashiers] = useState<CashierInterface[]>([]);
+    const [cashiers, setCashiers] = useState<CashierInterface>();
     const [bill, setBill] = useState<Partial<BillInterface>>(
         {}
     );
@@ -69,7 +69,9 @@ function BillCreate(){
     const apilUrl = "http://localhost:8080";
     const requesstOptions = {
         method : "GET",
-        header: {"Content-Type": "application/json"},
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"},
     };
     
     const handleClose = (event?:React.SyntheticEvent, reason?:string) => {
@@ -97,6 +99,7 @@ function BillCreate(){
         console.log(date);
         setSelectedDate(date);
     };
+
 
     const getPatient = async () =>{
         fetch(`${apilUrl}/patients`, requesstOptions)
@@ -130,7 +133,9 @@ function BillCreate(){
         const apiUrl = "http://localhost:8080/examination/" + getp.ID;
         const requestOptions = {
             method: "GET",
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"},
         }
 
         fetch(apiUrl, requestOptions)
@@ -159,9 +164,12 @@ function BillCreate(){
     };
 
     const getCashier = async () =>{
-        fetch(`${apilUrl}/cashiers`, requesstOptions)
+        let uid = localStorage.getItem("uid");
+        console.log(uid);
+        fetch(`${apilUrl}/cashier/${uid}`, requesstOptions)
             .then((response) => response.json())
             .then((res) => {
+                bill.CashierID = res.data.ID
                 if (res.data){
                     setCashiers(res.data);
                 }
@@ -194,7 +202,9 @@ function BillCreate(){
 
         const requesstOptionsPost = {
             method : "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"},
             body: JSON.stringify(data),
         };
 
@@ -224,7 +234,7 @@ function BillCreate(){
                     บันทึกข้อมูลไม่สำเร็จ
                 </Alert>
             </Snackbar>
-            <Paper className={classes.paper}>
+            <Paper className={classes.paper} >
                 <Box display="flex">
                     <Box flexGrow={1}>
                         <Typography
@@ -242,37 +252,42 @@ function BillCreate(){
                     </Box>
                 </Box>
                 <Divider />
-                <Grid container spacing={3} className={classes.root}>
-                    <Grid item xs={4}>
+                <Grid container spacing={4} className={classes.root}>
+                    <Grid item xs={5} >
+                    <FormControl fullWidth variant="outlined" size="small">
                         <p>คนไข้</p>
                         <Select
                             value={getp.ID}
                             onChange={handlePatientChange}
+                            defaultValue = {0}
                             inputProps={{
                                 name: "ID",
                             }}
                         >
-                            <MenuItem value="">
+                            <MenuItem value={0} key={0}>
                                 กรุณาเลือกคนไข้
                             </MenuItem>
                             {patients.map((item: PatientInterface) => (
                                 <MenuItem value={item.ID} key={item.ID}>
-                                    {item.Firstname}
+                                    {item.Firstname} {item.Lastname}
                                 </MenuItem>
                             ))}
                         </Select>
+                        </FormControl>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
+                    <FormControl fullWidth variant="outlined" size="small">
                         <p>ใบผลการรักษา</p>
                         <Select 
                             value={bill.ExaminationID}
                             onChange={handleChange}
                             onOpen={getExaminationByID}
+                            defaultValue = {0}
                             inputProps={{
                                 name: "ExaminationID",
                             }}
                         >
-                            <MenuItem aria-label="None" value="">
+                            <MenuItem value={0} key={0}>
                                 กรุณาเลือกผลการรักษา
                             </MenuItem>
                             {examinations.map((item: ExaminationInterface) => (
@@ -281,39 +296,40 @@ function BillCreate(){
                                 </MenuItem>
                             ))}
                         </Select>
-                   
+                    </FormControl>
                     </Grid>
-              
-                    <Grid item xs={6}>
+                                   
+                    <Grid item xs={4}>
+                    <FormControl fullWidth variant="outlined" size="small">     
                         <p>เจ้าหน้าที่การเงิน</p>
                         <Select
+                            native
+                            disabled
                             value={bill.CashierID}
                             onChange={handleChange}
                             inputProps={{
                                 name: "CashierID",
                             }}
                         >
-                            <MenuItem aria-label="None" value="">
-                                กรุณาเลือกเจ้าหน้าที่การเงิน
-                            </MenuItem>
-                            {cashiers.map((item:CashierInterface) => (
-                                <MenuItem value={item.ID} key={item.ID}>
-                                    {item.Name}
-                                </MenuItem>
-                            ))}
+                            <option value={cashiers?.ID} key={cashiers?.ID}>
+                                {cashiers?.Name}
+                            </option>
                         </Select>
+                    </FormControl>    
                     </Grid>
-
-                    <Grid item xs={6}>
+                    
+                    <Grid item xs={4}>
+                    <FormControl fullWidth variant="outlined" size="small">    
                         <p>สิทธิ์การรักษา</p>
                         <Select
                             value={bill.PatientRightID}
                             onChange={handleChange}
+                            defaultValue = {0}
                             inputProps={{
                                 name: "PatientRightID",
                             }}
                         >
-                            <MenuItem aria-label="None" value="">
+                            <MenuItem value={0} key={0}>
                                 กรุณาเลือกสิทธิ์การรักษา
                             </MenuItem>
                             {patientrights.map((item: PatientRightInterface) => (
@@ -322,6 +338,7 @@ function BillCreate(){
                                 </MenuItem>
                             ))}
                         </Select>
+                    </FormControl>
                     </Grid>
                     
                     <Grid item xs={6}>
