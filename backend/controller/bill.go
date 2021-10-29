@@ -23,6 +23,12 @@ func CreateBill(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	
+	// เช็คการบันทึก bill ผลการรักษาซ้ำ  ถ้ามีบิลผลการรักษาที่ซ้ำกัน ให้ return บิลนั้นออกไป
+	if tx := entity.DB().Table("bills").Where("examination_id = ?", bill.ExaminationID).First(&check_exam); tx.RowsAffected != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"billDuplicate": check_exam})
+		return
+	}
 
 	// 9: ค้นหา examination ด้วย id
 	if tx := entity.DB().Where("id = ?", bill.ExaminationID).First(&examination); tx.RowsAffected == 0 {
