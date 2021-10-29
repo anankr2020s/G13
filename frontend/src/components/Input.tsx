@@ -65,6 +65,7 @@ function BillCreate(){
 
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
+    const [warning, setWarning] = useState(false);
 
     const apilUrl = "http://localhost:8080";
     const requesstOptions = {
@@ -80,6 +81,7 @@ function BillCreate(){
         }
         setSuccess(false);
         setError(false);
+        setWarning(false);
 
     };
 
@@ -211,6 +213,9 @@ function BillCreate(){
         fetch(`${apilUrl}/bills`, requesstOptionsPost)
             .then((response) => response.json())
             .then((res) => {
+                if (res.billDuplicate){
+                    setWarning(true);
+                }
                 if(res.data) {
                     setSuccess(true);
                 }
@@ -232,6 +237,11 @@ function BillCreate(){
             <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="error">
                     บันทึกข้อมูลไม่สำเร็จ
+                </Alert>
+            </Snackbar>
+            <Snackbar open={warning} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="warning">
+                    มีการบันทึกใบแจ้งค่าใช้จ่าย สำหรับผลการรักษานี้แล้ว กรุณาเลือกผลการรักษาใหม่
                 </Alert>
             </Snackbar>
             <Paper className={classes.paper} >
