@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import {
@@ -26,12 +26,15 @@ import Button from "@material-ui/core/Button";
 import HomeIcon from "@material-ui/icons/Home";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import YouTubeIcon from "@material-ui/icons/YouTube";
+import { Assignment } from "@material-ui/icons";
 
-import Input from "./components/Input";
+import Input from "./components/Input"
 import Navbar from "./components/Navbar";
 import Home from "./components/home";
 import SignIn from "./components/SignIn";
 import billU from  "./components/billU"
+import { CashierInterface } from "./models/ICashier";
+
 
 const drawerWidth = 240;
 
@@ -111,6 +114,8 @@ export default function MiniDrawer() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [token, setToken] = React.useState<String>("");
+  const [uid, setUid] = React.useState<String>("");
+  const [cashiers, setCashiers] = useState<Partial<CashierInterface>>({});
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -121,15 +126,39 @@ export default function MiniDrawer() {
 
   const menu = [
     { name: "หน้าแรก", icon: <HomeIcon />, path: "/" },
-    { name: "ใบแจ้งค่าใช้จ่าย", icon: <AccountCircleIcon />, path: "/bills" },
+    { name: "ใบแจ้งค่าใช้จ่าย", icon: <Assignment/>, path: "/bills" },
   
   ];
 
+  const apilUrl = "http://localhost:8080";
+    const requesstOptions = {
+        method : "GET",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"},
+    };
+
+  const getCashier = async () =>{
+    let uid = localStorage.getItem("uid");
+    console.log(uid);
+    fetch(`${apilUrl}/cashier/${uid}`, requesstOptions)
+        .then((response) => response.json())
+        .then((res) => {
+            if (res.data){
+                setCashiers(res.data);
+            }
+            else{
+                console.log("else");
+            }
+        });
+};
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setToken(token);
     }
+    getCashier();
   }, []);
 
   if (!token) {
@@ -166,8 +195,11 @@ export default function MiniDrawer() {
                   <MenuIcon />
                 </IconButton>
                 <Typography variant="h6" className={classes.title}>
-                  ระบบใบแจ้งค่าใช้จ่าย
+                  ระบบใบแจ้งค่าใช้จ่าย  
                 </Typography>
+                <Button color="inherit">
+                  {cashiers?.Name}
+                </Button>
                 <Button color="inherit" onClick={signout}>
                   ออกจากระบบ
                 </Button>
