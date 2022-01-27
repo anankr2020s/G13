@@ -13,6 +13,8 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { BillInterface } from "../models/IBill";
+import { BillitemInterface } from "../models/IBillItem";
+import { ExaminationInterface } from "../models/IExamination";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -31,6 +33,8 @@ const useStyles = makeStyles((theme: Theme) =>
 function Bills() {
   const classes = useStyles();
   const [bills, setBills] = useState<BillInterface[]>([]);
+  const [billitems, setBillitems] = useState<Partial<BillitemInterface[]>>([]);
+  const [examinations, setExaminations] = useState<ExaminationInterface[]>([]);
 
   const getBills = async () => {
     const apiUrl = "http://localhost:8080/bills";
@@ -104,12 +108,10 @@ function Bills() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {bills.map((bill: BillInterface) => (
+            {bills.map((bill: BillInterface) => (
                 <TableRow key={bill.ID}>
                   <TableCell align="center">{bill.ID}</TableCell>
-                  <TableCell align="center">{bill.ExaminationID}</TableCell>
-                  <TableCell align="center">{bill.Examination.Treatment}</TableCell>
-                  <TableCell align="center">{bill.Total}</TableCell>
+                  
                   <TableCell align="center">{bill.Cashier.Name}</TableCell>
                 </TableRow>
               ))}

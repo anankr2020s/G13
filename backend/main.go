@@ -41,6 +41,10 @@ import (
 			protected.GET("/patientrights", controller.ListPatientRights)
 			protected.GET("/patientright/:id", controller.GetPatientRight)
 
+			//Paytype Routes
+			protected.GET("/paytypes", controller.ListPaytypes)
+			protected.GET("/paytype/:id", controller.GetPaytype)
+
 			//Crashier Routes
 			protected.GET("/cashiers", controller.ListCashiers)
 			protected.GET("/cashier/:id", controller.GetCashier)

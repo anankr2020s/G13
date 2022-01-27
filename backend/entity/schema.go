@@ -61,7 +61,7 @@ type Examination struct {
 
 	Medicine		uint8
 
-	Bills			[]Bill 		`gorm:"foreignKey:ExaminationID"`
+	BillItems 		[]BillItem	`gorm:"foreignKey:ExaminationID"`
 
 
 }
@@ -94,10 +94,6 @@ type Bill struct {
 
 	gorm.Model
 
-	ExaminationID	*uint	
-
-	Examination		Examination		`gorm:"references:id"`
-
 	PatientRightID	*uint
 
 	PatientRight	PatientRight	`gorm:"references:id"`
@@ -106,9 +102,42 @@ type Bill struct {
 
 	Total 			uint
 
+	Telephone 		string
+
+	PaytypeID		*uint
+
+	Paytype			Paytype 	`gorm:"references:id"`
+
 	CashierID		*uint
 
 	Cashier		Cashier	`gorm:"references:id"`
+
+	BillItems	[]BillItem  	`gorm:"foreignKey:BillID; constraint:OnDelete:CASCADE"`
+	
+
+}
+
+type BillItem struct {
+
+	gorm.Model 
+
+	ExaminationID 	*uint
+
+	Examination 	Examination		`gorm:"references:id"`
+
+	BillID 			*uint
+	Bill			Bill			`gorm:"references:id"`
+
+}
+
+
+type Paytype struct {
+
+	gorm.Model
+
+	Type 		string
+
+	Bills		[]Bill		`gorm:"foreignKey:PaytypeID"`
 
 
 }

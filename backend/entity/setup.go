@@ -28,7 +28,7 @@ func SetupDatabase(){
 		panic("failed to connect database")
 	}
 
-	database.AutoMigrate(&Patient{}, &Examination{}, &PatientRight{}, &Cashier{}, &Bill{})
+	database.AutoMigrate(&Patient{}, &Examination{}, &PatientRight{}, &Cashier{}, &Bill{}, &BillItem{}, &Paytype{})
 
 	db = database
 
@@ -145,10 +145,20 @@ func SetupDatabase(){
 	}
 	db.Model(&PatientRight{}).Create(&Pr2)
 
-	    
+	//Paytype Data
+
+	Pt1 := Paytype{
+		Type : "เงินสด",
+	}
+	db.Model(&Paytype{}).Create(&Pt1)
+
+	Pt2 := Paytype{
+		Type : "บัตรเครดิต",
+	}
+	db.Model(&Paytype{}).Create(&Pt2)
+
+
 	
-
-
-
+	    
 
 }	

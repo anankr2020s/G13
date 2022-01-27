@@ -12,10 +12,11 @@ import (
 // POST /bills
 func CreateBill(c *gin.Context) {
 
-	var examination entity.Examination
+	
 	var patientright entity.PatientRight
 	var cashier entity.Cashier
 	var bill entity.Bill
+	var paytype entity.Paytype
 	
 	
 	// ผลลัพธ์ที่ได้จากขั้นตอนที่ 8 จะถูก bind เข้าตัวแปร bill
@@ -24,21 +25,10 @@ func CreateBill(c *gin.Context) {
 		return
 	}
 	
-	// เช็คการบันทึก bill ผลการรักษาซ้ำ  ถ้ามีบิลผลการรักษาที่ซ้ำกัน ให้ return บิลนั้นออกไป
-	if tx := entity.DB().Table("bills").Where("examination_id = ?", bill.ExaminationID).First(&check_exam); tx.RowsAffected != 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"billDuplicate": check_exam})
-		return
-	}
-
-	// 9: ค้นหา examination ด้วย id
-	if tx := entity.DB().Where("id = ?", bill.ExaminationID).First(&examination); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "examination not found"})
-		return
-	}
 
 	// 10: ค้นหา patientright ด้วย id
 	if tx := entity.DB().Where("id = ?", bill.PatientRightID).First(&patientright); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "resolution not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "patientright not found"})
 		return
 	}
 
@@ -51,12 +41,12 @@ func CreateBill(c *gin.Context) {
 	
 		
 	// 12: สร้าง Bill
-	bl := entity.Bill{
-		Examination: examination,             // โยงความสัมพันธ์กับ Entity Examination
-		PatientRight:       patientright,                  // โยงความสัมพันธ์กับ Entity PatientRight
+	bl := entity.Bill{       
+		PatientRight:       patientright,
+		Paytype : paytype,                 // โยงความสัมพันธ์กับ Entity PatientRight
 		Cashier:    cashier,               // โยงความสัมพันธ์กับ Entity Crashier
 		BillTime: bill.BillTime, // ตั้งค่าฟิลด์ BillTime
-		Total:(examination.Treatment_cost+examination.Medicine_cost)-patientright.Discount,//ตั้งค่าฟิลด์ Total
+		
 	}
 
 	// 13: บันทึก
@@ -64,7 +54,39 @@ func CreateBill(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	
+	
+
+	var items []entity.BillItem
+
+	for _,item := range bill.BillItems{
+
+		var exams entity.Examination
+
+		if tx := entity.DB().Where("id = ?", item.ExaminationID).First(&exams); tx.RowsAffected == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "patientright not found"})
+			return
+		}
+
+		i := entity.BillItem{
+
+			Examination : exams,
+			Bill : bl,
+		}
+
+		items = append(items, i)
+	}
+
+	// 13: บันทึก
+	if err := entity.DB().Create(&items).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	entity.DB().Preload("BillItems").Preload("BillItems.Examination").Raw("SELECT * FROM bills WHERE id = ?", bl.ID).Find(&bl)
+
 	c.JSON(http.StatusOK, gin.H{"data": bl})
+
 }
 
 // GET /bill/:id
@@ -81,7 +103,7 @@ func GetBill(c *gin.Context) {
 // GET /bills
 func ListBills(c *gin.Context) {
 	var bills []entity.Bill
-	if err := entity.DB().Preload("Examination").Preload("PatientRight").Preload("Cashier").Raw("SELECT * FROM bills").Find(&bills).Error; err != nil {
+	if err := entity.DB().Preload("BillItem").Preload("PatientRight").Preload("Cashier").Raw("SELECT * FROM bills").Find(&bills).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
